@@ -36,10 +36,31 @@ metadata:
   name: hello-app-service
   namespace: hello-app
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: hello-app
   ports:
-    - port: 5000
+    - port: 80
       targetPort: 5000
-      nodePort: 30007
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hello-app-ingress
+  namespace: hello-app
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: hello-app.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: hello-app-service
+            port:
+              number: 80
